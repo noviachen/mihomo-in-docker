@@ -1,0 +1,329 @@
+#这里是订阅更新和延迟测试相关的
+p: &p {type: http, interval: 86400, health-check: {enable: true, url: http://www.apple.com/library/test/success.html, interval: 36000, timeout: 1000}}
+
+# url 里填写自己的订阅,名称不能重复,path（文件位置）不能重复
+proxy-providers:
+  dingyue1:
+    <<: *p
+    path: ./proxy_providers/1.yaml
+    url: https://example.dingyue.com/dingyue1
+  dingyue2:
+    <<: *p
+    path: ./proxy_providers/2.yaml
+    url: https://example.dingyue.com/dingyue2
+
+####################################
+# 下面的设置如果不清楚作用请不要修改
+####################################
+
+mode: rule
+ipv6: false
+log-level: info
+allow-lan: true
+mixed-port: 7890
+redir-port: 7892 
+unified-delay: true
+tcp-concurrent: true
+
+external-controller: 0.0.0.0:9090
+external-ui: ui
+secret: "yourpassword"
+
+# authentication: # http,socks入口的验证用户名，密码
+#   - "user:password"
+# skip-auth-prefixes: # 设置跳过验证的IP段
+#   - 127.0.0.1/8
+#   - ::1/128
+#   - 10.144.32.0/24
+#   - 10.156.43.0/24
+
+geodata-mode: true
+geox-url:
+  geoip: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
+  geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
+  mmdb: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb"
+
+find-process-mode: strict
+keep-alive-interval: 15
+global-client-fingerprint: chrome
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+ntp:
+  enable: true
+  write-to-system: false
+  server: time.apple.com
+  port: 123
+  interval: 30
+
+sniffer:
+  enable: true
+  sniff:
+    TLS:
+      ports: [443, 8443]
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+
+tun:
+  enable: false
+  stack: system
+  dns-hijack:
+    - 'any:1053'
+    - 'tcp://any:1053'
+  auto-route: true
+  auto-detect-interface: true
+
+dns:
+  enable: true
+  ipv6: false
+  listen: 0.0.0.0:1053
+  enhanced-mode: redir-host
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*.lan"
+    - localhost.ptlogin2.qq.com
+  nameserver:
+    - 223.5.5.5
+    - 180.76.76.76
+    - 119.29.29.29
+    - 117.50.11.11
+    - 117.50.10.10
+    - 114.114.114.114
+  fallback:
+    - 8.8.8.8
+    - 223.6.6.6
+    - 1.1.1.1
+    - tls://dns.rubyfish.cn:853
+    - tls://1.0.0.1:853
+    - tls://dns.google:853
+    - https://dns.rubyfish.cn/dns-query
+    - https://cloudflare-dns.com/dns-query
+    - https://dns.google/dns-query
+  fallback-filter:
+    geoip: true
+    ipcidr:
+      - 240.0.0.0/4
+
+proxies:
+  # - name: "WARP"
+  #   type: wireguard
+  #   server: engage.cloudflareclient.com
+  #   port: 2408
+  #   ip: "172.16.0.2/32"
+  #   ipv6: "2606::1/128"        # 自行替换
+  #   private-key: "private-key" # 自行替换
+  #   public-key: "public-key"   # 自行替换
+  #   udp: true
+  #   reserved: "abba"           # 自行替换
+  #   mtu: 1280
+  #   dialer-proxy: "dns"
+  #   remote-dns-resolve: true
+  #   dns:
+  #     - https://dns.cloudflare.com/dns-query
+
+proxy-groups:
+  - name: 🚀 节点选择
+    type: select
+    proxies:
+      - ♻️ 自动选择
+      - DIRECT
+    use:
+      - dingyue1
+      - dingyue2
+
+  - name: ♻️ 自动选择
+    type: url-test
+    url: http://www.apple.com/library/test/success.html
+    interval: 300
+    tolerance: 50
+    use:
+      - dingyue1
+      - dingyue2
+
+  - name: 🌍 国外媒体
+    type: select
+    proxies:
+      - 🚀 节点选择
+      - 🎯 全球直连
+      - ♻️ 自动选择
+    use:
+      - dingyue1
+      - dingyue2
+
+  - name: 📲 电报信息
+    type: select
+    proxies:
+      - 🚀 节点选择
+      - 🎯 全球直连
+      - ♻️ 自动选择
+    use:
+      - dingyue1
+      - dingyue2
+
+  - name: Ⓜ️ 微软服务
+    type: select
+    proxies:
+      - 🚀 节点选择
+      - 🎯 全球直连
+      - ♻️ 自动选择
+    use:
+      - dingyue1
+      - dingyue2
+
+  - name: 🍎 苹果服务
+    type: select
+    proxies:
+      - 🚀 节点选择
+      - 🎯 全球直连
+      - ♻️ 自动选择
+    use:
+      - dingyue1
+      - dingyue2
+
+  - name: 📢 谷歌FCM
+    type: select
+    proxies:
+      - 🚀 节点选择
+      - 🎯 全球直连
+      - ♻️ 自动选择
+    use:
+      - dingyue1
+      - dingyue2
+
+  - name: 🎯 全球直连
+    type: select
+    proxies:
+      - DIRECT
+      - 🚀 节点选择
+      - ♻️ 自动选择
+
+  - name: 🛑 全球拦截
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+
+  - name: 🍃 应用净化
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+
+  - name: 🐟 漏网之鱼
+    type: select
+    proxies:
+      - 🚀 节点选择
+      - 🎯 全球直连
+      - ♻️ 自动选择
+    use:
+      - dingyue1
+      - dingyue2
+
+rule-providers:
+# ACL4SSR Online
+  LocalAreaNetwork:
+    behavior: classical # domain, ipcidr or classical (premium core only)
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/LocalAreaNetwork.yaml"
+    interval: 86400
+    path: ./ACL4SSR/LocalAreaNetwork.yaml
+  UnBan:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/UnBan.yaml"
+    interval: 86400
+    path: ./ACL4SSR/UnBan.yaml
+  BanAD:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanAD.yaml"
+    interval: 86400
+    path: ./ACL4SSR/BanAD.yaml
+  BanProgramAD:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanProgramAD.yaml"
+    interval: 86400
+    path: ./ACL4SSR/BanProgramAD.yaml
+  GoogleFCM:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/Ruleset/GoogleFCM.yaml"
+    interval: 86400
+    path: ./ACL4SSR/GoogleFCM.yaml
+  GoogleCN:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/Ruleset/GoogleCN.yaml"
+    interval: 86400
+    path: ./ACL4SSR/GoogleCN.yaml
+  SteamCN:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/Ruleset/SteamCN.yaml"
+    interval: 86400
+    path: ./ACL4SSR/SteamCN.yaml
+  Microsoft:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/Ruleset/Microsoft.yaml"
+    interval: 86400
+    path: ./ACL4SSR/Microsoft.yaml
+  Apple:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/Ruleset/Apple.yaml"
+    interval: 86400
+    path: ./ACL4SSR/Apple.yaml
+  Telegram:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/Ruleset/Telegram.yaml"
+    interval: 86400
+    path: ./ACL4SSR/Telegram.yaml
+  ProxyLite:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyLite.yaml"
+    interval: 86400
+    path: ./ACL4SSR/ProxyLite.yaml
+  ProxyMedia:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyMedia.yaml"
+    interval: 86400
+    path: ./ACL4SSR/ProxyMedia.yaml
+  ChinaDomain:
+    behavior: classical 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaDomain.yaml"
+    interval: 86400
+    path: ./ACL4SSR/ChinaDomain.yaml
+  ChinaCompanyIp:
+    behavior: ipcidr 
+    type: http
+    url: "https://ghp.ci/https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaCompanyIp.yaml"
+    interval: 86400
+    path: ./ACL4SSR/ChinaCompanyIp.yaml
+
+rules:
+# ACL4SSR Online
+ - RULE-SET,LocalAreaNetwork,🎯 全球直连
+ - RULE-SET,UnBan,🎯 全球直连
+ - RULE-SET,BanAD,🛑 全球拦截
+ - RULE-SET,BanProgramAD,🍃 应用净化
+ - RULE-SET,GoogleFCM,📢 谷歌FCM
+ - RULE-SET,GoogleCN,🎯 全球直连
+ - RULE-SET,SteamCN,🎯 全球直连
+ - RULE-SET,Microsoft,Ⓜ️ 微软服务
+ - RULE-SET,Apple,🍎 苹果服务
+ - RULE-SET,Telegram,📲 电报信息
+ - RULE-SET,ProxyLite,🚀 节点选择 
+ - RULE-SET,ProxyMedia,🌍 国外媒体
+ - RULE-SET,ChinaDomain,🎯 全球直连
+ - RULE-SET,ChinaCompanyIp,🎯 全球直连
+ - GEOIP,CN,🎯 全球直连
+ - MATCH,🐟 漏网之鱼

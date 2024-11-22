@@ -1,0 +1,27 @@
+version: '3.3'
+services:
+    mihomo:
+        restart: unless-stopped
+        container_name: clash-mihomo
+        networks:
+                macvlan:
+                        ipv4_address: 192.168.3.23
+        privileged: true
+        build:
+                context: .
+                dockerfile: Dockerfile
+        volumes:
+            - './config.yml:/opt/clash/config.yml'
+        sysctls:
+                net.ipv4.ip_forward: 1
+networks:
+    macvlan:
+        driver: macvlan
+        driver_opts:
+            parent: eth0
+            macvlan_mode: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: "192.168.3.0/24"
+                  gateway: "192.168.3.1"
