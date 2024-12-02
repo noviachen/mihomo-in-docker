@@ -79,33 +79,29 @@ tun:
 dns:
   enable: true
   ipv6: false
+  prefer-h3: true
   listen: 0.0.0.0:1053
   enhanced-mode: redir-host
   fake-ip-range: 198.18.0.1/16
   fake-ip-filter:
-    - "*.lan"
-    - localhost.ptlogin2.qq.com
-  nameserver:
+    - '*'
+    - '+.lan'
+    - '+.local'
+  default-nameserver:
     - 223.5.5.5
-    - 180.76.76.76
     - 119.29.29.29
-    - 117.50.11.11
-    - 117.50.10.10
     - 114.114.114.114
-  fallback:
-    - 8.8.8.8
-    - 223.6.6.6
-    - 1.1.1.1
-    - tls://dns.rubyfish.cn:853
-    - tls://1.0.0.1:853
-    - tls://dns.google:853
-    - https://dns.rubyfish.cn/dns-query
-    - https://cloudflare-dns.com/dns-query
+  nameserver:
     - https://dns.google/dns-query
-  fallback-filter:
-    geoip: true
-    ipcidr:
-      - 240.0.0.0/4
+    - tls://dns.google
+    - https://dns11.quad9.net/dns-query
+    - tls://dns11.quad9.net
+  nameserver-policy:
+    "geosite:cn,private":
+      - https://dns.alidns.com/dns-query
+      - tls://dns.alidns.com
+      - https://doh.pub/dns-query
+      - tls://dot.pub
 
 proxies:
   # - name: "WARP"
